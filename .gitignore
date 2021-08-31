@@ -1,0 +1,12 @@
+# Object files
+*.o
+
+# Executables
+binary
+
+# Input / output
+input.txt
+out.txt
+
+# Doxygen generated
+# /docs/compiled
