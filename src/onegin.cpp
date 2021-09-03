@@ -1,9 +1,8 @@
-#include "include/text.h"
 #include "include/onegin.h"
 #include "include/config.h"
 #include "include/compare.h"
 #include "include/sort.h"
-#include <cstdlib>
+#include "include/error_t.h"
 
 void output(FILE *file, text_t *text) {
     for (int i = 0; i < text->n_lines; i++) {
@@ -12,7 +11,7 @@ void output(FILE *file, text_t *text) {
     }
 }
 
-exit_code onegin_client() {
+error_t onegin_client() {
     text_t text = {0};
 
     construct(&text, IN_FILE_NAME);
@@ -21,14 +20,14 @@ exit_code onegin_client() {
 
     FILE *file = fopen(OUT_FILE_NAME, "w");
     if (file == nullptr)
-        return exit_code::ERR_FOPEN;
+        return error_t::FOPEN;
 
     output(file, &text);
     
     int ret_code = fclose(file);
     if (ret_code == EOF)
-        return exit_code::ERR_FCLOSE;
+        return error_t::FCLOSE;
 
     destruct(&text);
-    return exit_code::SUCCEED;
+    return error_t::SUCCESS;
 }
