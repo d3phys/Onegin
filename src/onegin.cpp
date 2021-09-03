@@ -17,7 +17,7 @@ exit_code onegin_client() {
 
     construct(&text, IN_FILE_NAME);
 
-    bubble_sort(text.lines, text.n_lines, sizeof(line), compare_alphabet);
+    heap_sort(text.lines, text.n_lines, sizeof(line), compare_alphabet);
 
     FILE *file = fopen(OUT_FILE_NAME, "w");
     if (file == nullptr)

@@ -7,4 +7,5 @@
 int compare_alphabet(const void *item1, const void *item2);
 int compare_back_alphabet(const void *item1, const void *item2);
 
+int compare_int(const void *item1, const void *item2);
 #endif // COMPARE_H_
