@@ -9,4 +9,4 @@ input.txt
 out.txt
 
 # Doxygen generated
-# /docs/compiled
+/docs/compiled

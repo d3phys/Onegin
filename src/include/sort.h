@@ -11,8 +11,5 @@ void insertion_sort(void *items, const size_t n_items, const size_t item_size,
 
 void heap_sort(void *items, const size_t n_items, const size_t item_size, 
                  int (*compare)(const void*, const void*));
-// vstavki sort
-// quick sort
-// piramidalnaya
 
 #endif // SORT_H_
