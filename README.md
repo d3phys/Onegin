@@ -1,8 +1,8 @@
 <p align="center">
-     <img src="images//onegin_logo.png" alt="Logo" width="200"/>
+     <img src="images//onegin_logo.png" alt="Logo" width="100"/>
 </p>
 
-# Onegin;
+# Onegin
 The fastest text analyzer. It was written by a MIPT student as homework task.
 * [Installation](#installation)
 * [Usage](#usage)
