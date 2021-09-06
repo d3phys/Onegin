@@ -18,7 +18,7 @@
  * - 0  The element pointed by item1 is equivalent to the element pointed by item2 
  * - >0 The element pointed by item1 goes after the element pointed by item2 
  */
-int compare_alphabet(const void *item1, const void *item2);
+int compare_alpha(const void *item1, const void *item2);
 
 /**
  * \brief  Compares two strings using a back alphabet order
@@ -28,7 +28,7 @@ int compare_alphabet(const void *item1, const void *item2);
  * - 0  The element pointed by item1 is equivalent to the element pointed by item2 
  * - >0 The element pointed by item1 goes after the element pointed by item2 
  */
-int compare_back_alphabet(const void *item1, const void *item2);
+int compare_alpha_rev(const void *item1, const void *item2);
 
 /**
  * \brief  Compares two integers using algebra

@@ -1,4 +1,6 @@
 #include "include/sort.h"
+#include <cassert>
+#include <cstdio>
 
 int swap_s(void *item1, void *item2, int n_bytes) {
     if (item1 == item2)
@@ -37,6 +39,9 @@ int swap(void *item1, void *item2, int n_bytes) {
 
 void bubble_sort(void *items, const size_t n_items, const size_t item_size, 
                  int (*compare)(const void*, const void*)) {
+    assert(items);
+    assert(item_size);
+    assert(compare);
 
     char *data = (char *)items;
 
@@ -50,6 +55,9 @@ void bubble_sort(void *items, const size_t n_items, const size_t item_size,
 
 void insertion_sort(void *items, const size_t n_items, const size_t item_size, 
                     int (*compare)(const void*, const void*)) {
+    assert(items);
+    assert(item_size);
+    assert(compare);
 
     char *data = (char *)items;
     
@@ -66,33 +74,35 @@ void insertion_sort(void *items, const size_t n_items, const size_t item_size,
 
 void heap_sort(void *items, const size_t n_items, const size_t item_size, 
                     int (*compare)(const void*, const void*)) {
+    if (n_items < 2)
+        return;
 
     char *data = (char *)items;
     
-    size_t rt = 0;
-    size_t br = 0;
-    size_t i  = (n_items / 2 - 1) * item_size;
+    size_t root   = 0;
+    size_t branch = 0;
+    size_t i      = (n_items / 2 - 1);
 
     do {
-        for (rt = i; 2 * rt + 1 < n_items; rt = br) {
-            br = rt * 2 + 1;
-            if (br < n_items - 1 && 
-                compare(data + br * item_size, data + (br + 1) * item_size) < 0)
-                br++;
-            if (compare(data + br * item_size, data + rt * item_size) > 0)
-                swap(data + br * item_size, data + rt * item_size, item_size);
+        for (root = i; 2 * root + 1 < n_items; root = branch) {
+            branch = root * 2 + 1;
+            if (branch < n_items - 1 && 
+                compare(data + branch * item_size, data + (branch + 1) * item_size) < 0)
+                branch++;
+            if (compare(data + branch * item_size, data + root * item_size) > 0)
+                swap(data + branch * item_size, data + root * item_size, item_size);
         }
     } while (i-- > 0);
 
-    for (size_t n_swp = n_items - 1; n_swp > 0; n_swp--) {
-        swap(data, data + n_swp * item_size, item_size);
-        for (rt = 0; 2 * rt + 1 < n_swp; rt = br) {
-            br = rt * 2 + 1;
-            if (br < n_swp - 1 && 
-                compare(data + br * item_size, data + (br + 1) * item_size) < 0)
-                br++;
-            if (compare(data + br * item_size, data + rt * item_size) > 0)
-                swap(data + br * item_size, data + rt * item_size, item_size);
+    for (size_t n_swapped = n_items - 1; n_swapped > 0; n_swapped--) {
+        swap(data, data + n_swapped * item_size, item_size);
+        for (root = 0; 2 * root + 1 < n_swapped; root = branch) {
+            branch = root * 2 + 1;
+            if (branch < n_swapped - 1 && compare(data + branch * item_size, 
+                                                  data + (branch + 1) * item_size) < 0)
+                branch++;
+            if (compare(data + branch * item_size, data + root * item_size) > 0)
+                swap(data + branch * item_size, data + root * item_size, item_size);
         }
     }
 }

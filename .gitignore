@@ -2,7 +2,7 @@
 *.o
 
 # Executables
-binary
+onegin
 
 # Input / output
 input.txt

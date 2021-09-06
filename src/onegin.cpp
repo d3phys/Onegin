@@ -3,31 +3,58 @@
 #include "include/compare.h"
 #include "include/sort.h"
 #include "include/error_t.h"
+#include <assert.h>
 
-void output(FILE *file, text_t *text) {
-    for (int i = 0; i < text->n_lines; i++) {
+error_t onegin_cfg(config *cfg, int argc, char *argv[]) {
+    assert(argv);
+    assert(cfg);
+
+    cfg->compare_func = compare_alpha;
+    cfg->sort_func    = heap_sort;
+    cfg->input_file   = INPUT_FILE;
+    cfg->output_file  = OUTPUT_FILE;
+
+    return SUCCESS;
+}
+
+void output(FILE *file, const text_t *text) {
+    assert(file);
+    assert(text);
+
+    size_t n_lines = text->n_lines;
+    for (size_t i = 0; i < n_lines; i++) {
         fwrite(text->lines[i].start, sizeof(char), text->lines[i].length, file);
         fprintf(file, "\n");
     }
 }
 
-error_t onegin_client() {
+error_t onegin_client(const config *cfg) {
+    assert(cfg);
+
     text_t text = {0};
 
-    construct(&text, IN_FILE_NAME);
-
-    heap_sort(text.lines, text.n_lines, sizeof(line), compare_alphabet);
-
-    FILE *file = fopen(OUT_FILE_NAME, "w");
+    FILE *file = fopen(cfg->input_file, "r");
     if (file == nullptr)
-        return error_t::FOPEN;
+        return FOPEN;
+
+    construct_text(&text, file);
+
+    if (ferror(file) != 0)
+        return FERROR;
+    fclose(file);
+
+    cfg->sort_func(text.lines, text.n_lines, sizeof(line), cfg->compare_func);
+
+    file = fopen(cfg->output_file, "w");
+    if (file == nullptr)
+        return FOPEN;
 
     output(file, &text);
+    destruct_text(&text);
     
-    int ret_code = fclose(file);
-    if (ret_code == EOF)
-        return error_t::FCLOSE;
+    if (ferror(file) != 0)
+        return FERROR;
+    fclose(file);
 
-    destruct(&text);
-    return error_t::SUCCESS;
+    return SUCCESS;
 }

@@ -11,10 +11,11 @@
  * \brief Error codes 
  */
 enum error_t {
-    SUCCESS = 0, /**< Succes                  */
-    FOPEN   = 1, /**< Opening file error      */
-    FCLOSE  = 2, /**< Closing file error      */
-    ALLOC   = 3, /**< Allocation memory error */
+    SUCCESS      = 0, /**< Succes                  */
+    FOPEN        = 1, /**< Opening file error      */
+    FERROR       = 2, /**< Closing file error      */
+    ALLOC        = 3, /**< Allocation memory error */
+    INCORR_INPUT = 4, /**< Incorrect input error */
 };
 
 #endif // _ERROR_T_H_

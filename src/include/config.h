@@ -7,7 +7,7 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
-const char IN_FILE_NAME[]  = "input.txt"; /**< File to read from */
-const char OUT_FILE_NAME[] = "out.txt";   /**< File to write to  */
+const char INPUT_FILE[]  = "input.txt";
+const char OUTPUT_FILE[] = "output.txt";
 
 #endif // CONFIG_H_

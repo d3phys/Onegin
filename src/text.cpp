@@ -9,6 +9,9 @@ int not_endl(int ch) {
 }
 
 size_t skip(const char **curr_pos, int (*valid)(int)) {
+    assert(curr_pos);
+    assert(valid);
+
     size_t n_skipped = 0;
 
     while(valid(**curr_pos) != 0) {
@@ -50,6 +53,8 @@ void extract_lines(const char *buffer, line *lines) {
 }
 
 size_t get_size(FILE *file) {
+    assert(file);
+
     fseek(file, 0, SEEK_END);
     size_t file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
@@ -57,32 +62,23 @@ size_t get_size(FILE *file) {
     return file_size;
 }
 
-error_t construct(text_t *text, const char *file_name) {
+error_t construct_text(text_t *text, FILE *file) {
     assert(text);
-    assert(file_name);
-
-    FILE *file = fopen(file_name, "r");
-    if (file == nullptr)
-        return error_t::FOPEN;
+    assert(file);
 
     size_t file_size = get_size(file);
-    char *test = (char *)calloc(file_size + 1, sizeof(char));
-    free(test);
 
     text->buffer = (char *)calloc(file_size + 1, sizeof(char));
     if (text->buffer == nullptr)
         return error_t::ALLOC;
 
     fread(text->buffer, sizeof(char), file_size, file);
-    
-    int ret_code = fclose(file);
-    if (ret_code == EOF)
-        return error_t::FCLOSE;
+    if (ferror(file) != 0)
+        return error_t::FERROR;
 
     text->n_lines = count_lines(text->buffer);
     text->lines = (line *)calloc(text->n_lines, sizeof(line));
-
-    if (text->buffer == nullptr)
+    if (text->lines== nullptr)
         return error_t::ALLOC;
 
     extract_lines(text->buffer, text->lines);
@@ -90,7 +86,7 @@ error_t construct(text_t *text, const char *file_name) {
     return error_t::SUCCESS;
 }
 
-void destruct(text_t *text) {
+void destruct_text(text_t *text) {
     assert(text);
 
     free(text->lines);

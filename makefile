@@ -2,7 +2,7 @@ SRC_FOLDER = ./src
 SRC = $(wildcard $(SRC_FOLDER)/*.cpp)
 OBJ = $(SRC:.cpp=.o)
 CC = g++
-TARGET = binary
+TARGET = onegin
 
 all: out
 	./$(TARGET)

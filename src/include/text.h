@@ -32,26 +32,26 @@ struct text_t {
     size_t n_lines = 0;       /**< Lines has been read        */
 };
 
-
 /**
- * \brief Skips valid characters.
+ * \brief Skips valid characters
  *
- * \details Moves text pointer to a new position. 
- *  Valid function should return non-zero value if character is not valid, and 0 otherwise.
+ * \details Moves text pointer to a new position
+ * Valid function should return non-zero value if character is not valid, and 0 otherwise
  *
  * \code
  *
- *  // Valid function example
+ *  // "Valid argument nction" example
  *  int not_endl(int ch) {
  *      return (ch != '\n' && ch != '\0');
  *  }
  *
  * \endcode
  *
- * \param curr_pos Current text pointer
- * \param valid    Function that indicates the correctness of a character.
+ * \param[out] curr_pos Current text pointer
+ * \param      valid    Function that indicates the correctness of a character.
  */
 size_t skip(const char **curr_pos, int (*valid)(int));
+
 int not_endl(int ch);
 
 /**
@@ -64,7 +64,7 @@ int not_endl(int ch);
 size_t count_lines(const char *buffer);
 
 /**
- * \brief Extracts lines from buffer to the lines array.
+ * \brief Extracts lines from buffer to the lines array
  *
  * \param buffer Text buffer
  * \param lines  Lines array
@@ -79,12 +79,12 @@ void   extract_lines(const char *buffer, line *lines);
  * \param text      Text to create 
  * \param file_name File that contains lines
  */
-error_t construct(text_t *text, const char *file_name);
+error_t construct_text(text_t *text, FILE *file);
 
 /**
  * \brief Text object destructor 
  */
-void destruct(text_t *text);
+void destruct_text(text_t *text);
 
 /**
  * \brief Counts file size in bytes
