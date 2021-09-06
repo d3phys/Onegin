@@ -10,7 +10,7 @@
 
 int main(int argc, char *argv[]) {
     config cfg = {};
-    onegin_cfg(&cfg, argc, argv);
+    construct_onegin_cfg(&cfg, argc, argv);
 
     onegin_client(&cfg);
     

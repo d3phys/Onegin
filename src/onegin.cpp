@@ -5,7 +5,7 @@
 #include "include/error_t.h"
 #include <assert.h>
 
-error_t onegin_cfg(config *cfg, int argc, char *argv[]) {
+error_t construct_onegin_cfg(config *cfg, int argc, char *argv[]) {
     assert(argv);
     assert(cfg);
 

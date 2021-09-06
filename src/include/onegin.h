@@ -21,7 +21,7 @@ struct config {
     int (*compare_func)(const void*, const void*);
 };
 
-error_t onegin_cfg(config *cfg, int argc, char *argv[]);
+error_t construct_onegin_cfg(config *cfg, int argc, char *argv[]);
 
 /**
  * \brief Main Onegin client procedure
