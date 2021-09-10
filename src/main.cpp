@@ -6,13 +6,11 @@
 #include <stdio.h>
 #include "include/compare.h"
 
-#define TEST
+//#define TEST
 
-int main(int argc, char *argv[]) {
-    config cfg = {};
-    construct_onegin_cfg(&cfg, argc, argv);
-
-    onegin_client(&cfg);
+int main(const int argc, const char *argv[]) {
+    if (construct_onegin_cfg(argc, argv) == 0)
+        onegin_client();
     
 #ifdef TEST
     test_sorts();

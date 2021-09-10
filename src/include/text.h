@@ -79,7 +79,7 @@ void   extract_lines(const char *buffer, line *lines);
  * \param text      Text to create 
  * \param file_name File that contains lines
  */
-error_t construct_text(text_t *text, FILE *file);
+int construct_text(text_t *text, FILE *file);
 
 /**
  * \brief Text object destructor 
