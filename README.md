@@ -26,7 +26,7 @@ This command reads the `input.txt` file, than sorts the lines using the bubble s
 You can see the commonly used options using `-help` or `-h` option.
 
 <p align="center">
-     <img src="images//onegin_logo.png" alt="Logo" width="500"/>
+     <img src="images//help_example.png" alt="Logo" width="500"/>
 </p>
 
 ## Docs
