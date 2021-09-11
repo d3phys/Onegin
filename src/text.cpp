@@ -21,7 +21,7 @@ size_t skip(const char **curr_pos, int (*valid)(int)) {
 
     return n_skipped;
 }
-
+//strtok
 size_t count_lines(const char *buffer) {
     assert(buffer);
 
@@ -62,7 +62,7 @@ size_t get_size(FILE *file) {
     return file_size;
 }
 
-error_t construct_text(text_t *text, FILE *file) {
+int construct_text(text_t *text, FILE *file) {
     assert(text);
     assert(file);
 
@@ -72,7 +72,7 @@ error_t construct_text(text_t *text, FILE *file) {
     if (text->buffer == nullptr)
         return error_t::ALLOC;
 
-    fread(text->buffer, sizeof(char), file_size, file);
+    fread(text->buffer, sizeof(char), file_size, file);//file_size = fread windows
     if (ferror(file) != 0)
         return error_t::FERROR;
 

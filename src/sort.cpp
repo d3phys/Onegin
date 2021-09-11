@@ -65,7 +65,7 @@ void insertion_sort(void *items, const size_t n_items, const size_t item_size,
     for (size_t i = 1; i < n_items; i++) {
         curr = i;
         while (compare(data + item_size * curr, data + item_size * (curr - 1)) < 0) {
-            swap(data + item_size * curr, data + item_size * (curr - 1), item_size);
+            swap(      data + item_size * curr, data + item_size * (curr - 1), item_size);
             if (--curr == 0)
                 break;
         }

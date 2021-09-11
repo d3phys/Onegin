@@ -8,21 +8,13 @@
 
 #define ERROR_DISPLAY
 
-const char HELP_MESSAGE[] = "------------------------------------------------------------------\n"
-                            "-h|-help                                   - print this message.  \n"
-                            "-i|-input   <file name>                    - set input file.      \n"
-                            "-o|-output  <file names>                   - set output files.    \n"
-                            "-s|-sort    heap(default)/bubble/insertion - set sort algorithm. \n"
-                            "-c|-compare alpha(default)/alphar          - set compare priority.\n"
-                            "------------------------------------------------------------------\n"
-                            "Check README to see the details.\n";
+FILE *LOG = stdout;
 
 static config CFG = {0};
 
 int construct_onegin_cfg(const int argc, const char *argv[]) {
     assert(argv);
     
-    CFG.n_output_files = 1;
     CFG.sort_func      = heap_sort;
     CFG.compare_func   = compare_alpha;
 
@@ -38,21 +30,22 @@ void output(FILE *file, const text_t *text) {
 
     size_t n_lines = text->n_lines;
     for (size_t i = 0; i < n_lines; i++) {
-        fwrite(text->lines[i].start, sizeof(char), text->lines[i].length, file);
+        fwrite(text->lines[i].start, sizeof(char), text->lines[i].length, file);//warning
         fprintf(file, "\n");
     }
 }
 
 
-#define SHOW_ERROR(error) printf("\u001b[31m%s\nFailed.\u001b[0m\n", error);
+#define LOG_ERROR(error) fprintf(LOG, "%s\nFailed.\n", error);//log file fflush + -- ignore options
 
 int onegin_client() {
     text_t text = {0};
 
+    fflush(LOG);
     FILE *file = fopen(CFG.input_file, "r");
     if (file == nullptr) {
 #ifdef ERROR_DISPLAY
-        SHOW_ERROR("Opening input file error.");
+        LOG_ERROR("Opening input file error.");
 #endif
         return FOPEN;
     }
@@ -61,7 +54,7 @@ int onegin_client() {
 
     if (ferror(file) != 0) {
 #ifdef ERROR_DISPLAY
-        SHOW_ERROR("File stream error.");
+        LOG_ERROR("File stream error.");
 #endif
         return FERROR;
     }
@@ -73,7 +66,8 @@ int onegin_client() {
         file = fopen(CFG.output_files[i], "w");
         if (file == nullptr) {
 #ifdef ERROR_DISPLAY
-        SHOW_ERROR("Opening output file error. Undefined behavior.");
+        LOG_ERROR("Opening output file error. Undefined behavior.");
+        fflush(LOG);
 #endif
             return FOPEN;
         }
@@ -82,7 +76,7 @@ int onegin_client() {
 
         if (ferror(file) != 0) {
 #ifdef ERROR_DISPLAY
-        SHOW_ERROR("File stream error.");
+        LOG_ERROR("File stream error.");
 #endif
             return FERROR;
         }
@@ -91,11 +85,12 @@ int onegin_client() {
 
     destruct_text(&text);
 
+    fclose(LOG);
     return 0;
 }
 
 int set_cfg_output(const char *args[], const size_t n_args) {
-    if (n_args < 2)
+    if (n_args < 2 || n_args > MAX_OUT_FILES + 1)
         return -1;
 
     size_t n_out = 0;
@@ -120,40 +115,54 @@ int set_cfg_sort_func(const char *args[], const size_t n_args) {
     if (n_args != 2)
         return -1;
 
-    const size_t sort_name_size = 10;
     const char *sort = args[1];
 
-    if (strncmp("heap", sort, sort_name_size) == 0)
-        CFG.sort_func = heap_sort;
-    else if (strncmp("bubble", sort, sort_name_size) == 0)
-        CFG.sort_func = bubble_sort;
-    else if (strncmp("insertion", sort, sort_name_size) == 0)
-        CFG.sort_func = insertion_sort;
-    else
-        return -1;
+    size_t n_algs = sizeof(ALGORITHMS) / sizeof(*ALGORITHMS);
+    for (int i = 0; i < n_algs; i++)
+        if (strncmp(ALGORITHMS[i].name, sort, KEYWORD_SIZE) == 0) {
+            CFG.sort_func= ALGORITHMS[i].sort_func;
+            return 0;
+        }
 
-    return 0;
+    return -1;
 }
 
 int set_cfg_comp_func(const char *args[], const size_t n_args) {
     if (n_args != 2)
         return -1;
 
-    const size_t comp_name_size = 10;
     const char *comp = args[1];
 
-    if (strncmp("alpha", comp, comp_name_size) == 0)
-        CFG.compare_func = compare_alpha;
-    else if (strncmp("alphar", comp, comp_name_size) == 0)
-        CFG.compare_func = compare_alpha_rev;
-    else
+    size_t n_priorities = sizeof(PRIORITIES) / sizeof(*PRIORITIES);
+    for (int i = 0; i < n_priorities; i++)
+        if (strncmp(PRIORITIES[i].name, comp, KEYWORD_SIZE) == 0) {
+            CFG.compare_func = PRIORITIES[i].compare_func;
+            return 0;
+        }
+
+    return -1;
+}
+
+int set_log_file(const char *args[], const size_t n_args) {
+    if (n_args != 2)
         return -1;
 
+    fflush(LOG);
+    FILE *log = fopen(args[1], "w");
+    if (log == nullptr)
+            return -1;
+    
+    LOG = log;
     return 0;
 }
 
 int show_onegin_help(const char *args[], const size_t n_args) {
-    printf("%s", HELP_MESSAGE);
+    size_t n_options = sizeof(ONEGIN_OPTIONS) / sizeof(*ONEGIN_OPTIONS);
+    for (size_t i = 0; i < n_options; i++) {
+        printf("-%c | -%-*s - %-*s\n", ONEGIN_OPTIONS[i].short_keword, 
+                (int)KEYWORD_SIZE,     ONEGIN_OPTIONS[i].keyword,
+                (int)DESCRIPTION_SIZE, ONEGIN_OPTIONS[i].description);
+    }
     return 0;
 }
 
