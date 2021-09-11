@@ -23,15 +23,11 @@ You can easily analyze texts using console arguments. For example:
 
 This command reads the `input.txt` file, than sorts the lines using the bubble sort algorithm and outputs them to the files `output1.txt` and `output2.txt`.
 
-The commonly used options are listed below:
-- `-h` or `-help` - additionally displays help message.
-- `-i` or `-input` + `<file name>` - sets the input *file*.
-- `-o` or `-output` + `<file names>` - sets the output *files*.
-- `-s` or `-sort` + `bubble` or `heap` or `insertion` - sets the sort algorithm. 
-- `-c` or `-compare` + `alpha` or 'alphar' - sets the compare priority. 
-  - `alpha` means alphabetical order.
-  - `alphar` means reversed alphabetical order.
+You can see the commonly used options using `-help` or `-h` option.
 
+<p align="center">
+     <img src="images//onegin_logo.png" alt="Logo" width="500"/>
+</p>
 
 ## Docs
 If you want to use some modules or modify the whole program, you can check the documetation.
