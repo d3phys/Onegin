@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "include/compare.h"
+#include <stdint.h>
 
 //#define TEST
 

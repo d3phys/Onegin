@@ -1,6 +1,40 @@
 #include "include/sort.h"
 #include <cassert>
 #include <cstdio>
+#include <stdint.h>
+#include <limits.h>
+
+#define SWAP(type, size, temp, chunk1, chunk2) \
+        temp            = *(type *)chunk1;     \
+        *(type *)chunk1 = *(type *)chunk2;     \
+        *(type *)chunk2 = temp;                \
+                                               \
+        chunk1 = (type *)chunk1 + 1;           \
+        chunk2 = (type *)chunk2 + 1;           \
+        n_bytes -= size;
+
+int swap(void *chunk1, void *chunk2, int n_bytes) {
+    int64_t temp = 0;
+
+    while (n_bytes >= 8) {
+        SWAP(int64_t, 8, temp, chunk1, chunk2);
+    }
+
+    if (n_bytes >= 4) {
+        SWAP(int32_t, 4, temp, chunk1, chunk2);
+    }
+
+    if (n_bytes >= 2) {
+        SWAP(int16_t, 2, temp, chunk1, chunk2);
+    }
+    
+    if (n_bytes >= 1) {
+        SWAP(int8_t,  1, temp, chunk1, chunk2);
+    }
+
+    return 0;
+}
+#undef SWAP
 
 int swap_s(void *item1, void *item2, int n_bytes) {
     if (item1 == item2)
@@ -23,7 +57,7 @@ int swap_s(void *item1, void *item2, int n_bytes) {
     return 0;
 }
 
-int swap(void *item1, void *item2, int n_bytes) {
+/* int swap(void *item1, void *item2, int n_bytes) {
     char *elem1 = (char *)item1;
     char *elem2 = (char *)item2;
     char temp   = 0;
@@ -35,6 +69,55 @@ int swap(void *item1, void *item2, int n_bytes) {
     }
 
     return 0;
+}
+*/
+
+void quick_sort(void *items, const size_t n_items, const size_t item_size, 
+                int (*compare)(const void*, const void*)) {
+    assert(items);
+    assert(item_size);
+    assert(compare);
+
+    char *data  = (char *)items;
+    char *start = data;
+    char *end   = data + item_size * (n_items - 1);
+
+    char *low   = nullptr;
+    char *high  = nullptr;
+
+    while (true) {
+
+        low = start;
+        while (low != end) {
+            if (compare(start, low) < 0)
+                break;
+            low += item_size;
+        }
+
+        if (low == end) {
+            swap(low, start, item_size);
+            end -= item_size;
+            continue;
+        }
+
+        high = end;
+        while (high != low) {
+            if (compare(start, high) >= 0)
+                break;
+            high -= item_size;
+        }
+
+    }
+
+
+
+    
+    for (size_t i = 0; i < n_items; i++) {
+        for (size_t j = 0; j < n_items - i - 1; j++) {
+            if (compare(data + item_size * j, data + item_size * (j + 1)) > 0)
+                swap(data + item_size * j, data + item_size * (j + 1), item_size);
+        }
+    }
 }
 
 void bubble_sort(void *items, const size_t n_items, const size_t item_size, 

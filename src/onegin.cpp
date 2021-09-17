@@ -36,7 +36,7 @@ void output(FILE *file, const text_t *text) {
 }
 
 
-#define LOG_ERROR(error) fprintf(LOG, "%s\nFailed.\n", error);//log file fflush + -- ignore options
+#define LOG_ERROR(error) fprintf(LOG, "%s\nFailed.\n", error);//-- ignore options errno + strerror 
 
 int onegin_client() {
     text_t text = {0};

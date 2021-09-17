@@ -15,7 +15,7 @@
 
 extern FILE *LOG;
 
-const size_t MAX_OUT_FILES = 32;
+const size_t MAX_OUT_FILES    = 32;
 const size_t DESCRIPTION_SIZE = 100;
 
 struct config {
