@@ -1,4 +1,5 @@
 #include "include/compare.h"
+#include "include/poem.h"
 #include <string.h>
 
 int compare_int(const void *item1, const void *item2) {
@@ -8,7 +9,14 @@ int compare_int(const void *item1, const void *item2) {
     return (i1 > i2) - (i2 > i1);
 }
 
+int compare_alpha_rev(const void *item1, const void *item2) {
+    return cmp_alpha_punct_ignored_from_end(*(line*)item1, *(line*)item2);
+}
+
 int compare_alpha(const void *item1, const void *item2) {
+    return cmp_alpha_punct_ignored(*(line*)item1, *(line*)item2);
+}
+/*int compare_alpha(const void *item1, const void *item2) {
     const char *str1 = ((line *)item1)->start;
     const char *str2 = ((line *)item2)->start;
     
@@ -44,5 +52,5 @@ int compare_alpha_rev(const void *item1, const void *item2) {
 
     return (*str1 > *str2) - (*str2 > *str1);
 }
-
+*/
 

@@ -8,7 +8,7 @@
 #define COMPARE_H_
 
 #include <stdio.h>
-#include "text.h"
+#include "poem.h"
 
 /**
  * \brief  Compares two strings using an alphabet order

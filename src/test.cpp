@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "include/compare.h"
-#include "include/test.h"
+//#include "include/test.h"
 #include "include/sort.h"
 #include <assert.h>
 
