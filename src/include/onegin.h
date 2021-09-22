@@ -2,22 +2,21 @@
  * \file
  * \brief  Onegin client
  * \author d3phys
- * \date   03.09.2021
+ * \date   21.09.2021
  */
 #ifndef ONEGIN_H_
 #define ONEGIN_H_
 
-#include "compare.h"
-#include "error_t.h"
+#include <stddef.h>
 #include "argv.h"
 #include "sort.h"
-#include <cstddef>
 
-const size_t MAX_OUT_FILES    = 0x20;
-const size_t DESCRIPTION_SIZE = 100;
+
+const size_t MAX_OUT_FILES    = 32;
+const size_t DESCRIPTION_SIZE = 128;
 
 int sort();
-int format();
+int show_help();
 
 struct config {
     int (*action)();
@@ -31,24 +30,21 @@ struct config {
 
     int (*compare_func)(const void *, const void *);
 };
-/*
-int set_format_action(const char *args[], const size_t n_args);
+
+int set_help_action(const char *args[], const size_t n_args);
 int set_cfg_output(const char *args[], const size_t n_args);
 int set_cfg_input (const char *args[], const size_t n_args);
 int set_cfg_sort_func(const char *args[], const size_t n_args);
 int set_cfg_comp_func(const char *args[], const size_t n_args);
-int set_log_file(const char *args[], const size_t n_args);
-int show_onegin_help(const char *args[], const size_t n_args);
+
 const option ONEGIN_OPTIONS[] {
     {"from",    'f', set_cfg_input,     "sets input file"        },
     {"to",      't', set_cfg_output,    "sets output files"      },
     {"compare", 'c', set_cfg_comp_func, "sets the priority"      },
-    {"help",    'h', show_onegin_help,  "prints this message"    },
+    {"help",    'h', set_help_action,   "prints this message"    },
     {"sort",    's', set_cfg_sort_func, "sets the sort algorithm"},
-    {"log",     'l', set_log_file,      "sets the log file"      },
-    {"format",  'b', set_format_action, "Format input text and outputs it" },
 };
-*/
+
 struct sort_algorithm {
     const char *name;
     void (*sort_func)(void *, const size_t, const size_t, 
@@ -66,10 +62,14 @@ struct priority {
     int (*compare_func)(const void *, const void *);
 };
 
+int compare_alpha_from_end(const void *item1, const void *item2);
+int compare_alpha(const void *item1, const void *item2);
+
 const priority PRIORITIES[] {
-    {"alpha",  compare_alpha},
-    {"alphar", compare_alpha_rev},
+    {"forward",  compare_alpha},
+    {"fromback", compare_alpha_from_end},
 };
+
 
 int construct_onegin_cfg(const int argc, const char *argv[]);
 

@@ -1,8 +1,6 @@
 #include "include/sort.h"
-#include <cassert>
-#include <cstdio>
+#include <assert.h>
 #include <stdint.h>
-#include <limits.h>
 
 #define SWAP(type, size, temp, chunk1, chunk2) \
         temp            = *(type *)chunk1;     \

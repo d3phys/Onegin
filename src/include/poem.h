@@ -8,14 +8,13 @@
 #define POEM_H_
 
 #include <stdio.h>
-#include "error_t.h"
 
 /**
  * \brief Text line
  *
  * \details Line means a string without '\0' and '\n' symbol
  */
-struct line {
+struct line_t {
     const char *start = nullptr; /**< Pointer to the line start */
     const char *end   = nullptr;
     size_t     length = 0;       /**< Line length without '\0'  */
@@ -27,15 +26,15 @@ struct line {
  * \details Main poem object. Contains poem information.
  */
 struct poem_t {
-    line *lines    = nullptr; /**< Text lines                 */
+    line_t *lines    = nullptr; /**< Text lines                 */
     size_t n_lines = 0;       /**< Lines has been read        */
 };
 
 char *buffer(const char *const file);
 int save_poem(const poem_t *const poem, const char *const file);
-int cross_out(poem_t *const poem, int (*rule)(const line line));
+int cross_out(poem_t *const poem, int (*rule)(const line_t line));
 
-int rule_empty(const line line);
+int rule_empty(const line_t line);
 /**
  * \brief Counts lines in a poem buffer
  *
@@ -51,7 +50,7 @@ size_t count_lines(const char *const buffer);
  * \param buffer Text buffer
  * \param lines  Lines array
  */
-void extract_lines(const char *const buffer, line *lines);
+void extract_lines(const char *const buffer, line_t *lines);
 
 /**
  * \brief Text object constructor
@@ -74,10 +73,10 @@ void destruct_poem(poem_t *poem);
 off_t get_size(const char *const file);
 
 
-int cmp_alpha(const line line1, const line line2);
-int cmp_alpha_from_end(const line line1, const line line2);
-int cmp_alpha_punct_ignored(const line line1, const line line2);
-int cmp_alpha_punct_ignored_from_end(const line line1, const line line2);
+int cmp_alpha(const line_t line1, const line_t line2);
+int cmp_alpha_from_end(const line_t line1, const line_t line2);
+int cmp_alpha_punct_ignored(const line_t line1, const line_t line2);
+int cmp_alpha_punct_ignored_from_end(const line_t line1, const line_t line2);
 
 
 #endif // POEM_H_

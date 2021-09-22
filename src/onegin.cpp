@@ -1,27 +1,47 @@
-#include "include/onegin.h"
-#include "include/compare.h"
-#include "include/sort.h"
-#include "include/error_t.h"
-#include "include/argv.h"
-#include "include/debug.h"
 #include <assert.h>
-#include <cstdlib>
+#include <stdlib.h>
 #include <string.h>
+#include "include/onegin.h"
+#include "include/sort.h"
+#include "include/argv.h"
+#include "include/poem.h"
 
-/*
 static config CONFIG = {0};
+
+enum errors {
+    ONEG_NO_INPUT_FILE  = -4,
+    ONEG_NO_OUTPUT_FILE = -2,
+    ONEG_SAVE_ERROR     = -3,
+};
 
 int construct_onegin_cfg(const int argc, const char *argv[]) {
     assert(argv);
     
+    CONFIG.action       = sort;
     CONFIG.sort_func    = heap_sort;
     CONFIG.compare_func = compare_alpha;
-    CONFIG.action = sort;
 
-    int error = scan_args(argc, argv, ONEGIN_OPTIONS, 
+int error = scan_args(argc, argv, ONEGIN_OPTIONS, 
                           sizeof(ONEGIN_OPTIONS) / sizeof(*ONEGIN_OPTIONS));
 
-    if (error != 0) {
+    if (error) {
+        switch (error) {
+            case ARGV_BAD_INPUT:
+                fprintf(stderr, "Bad input\n");
+                break;
+            case ARGV_ACTION_FAIL:
+                fprintf(stderr, "Action %s failed\n", argv_option());
+                break;
+            case ARGV_NO_KEYWORD:
+                fprintf(stderr, "Keyword %s not found\n", argv_option());
+                break;
+            case ARGV_SYSTEM:
+                fprintf(stderr, "System error\n");
+                break;
+            default:
+                assert(nullptr);
+        }
+
         return -1;
     }
 
@@ -30,129 +50,105 @@ int construct_onegin_cfg(const int argc, const char *argv[]) {
 
 int onegin_client() {
     int error = CONFIG.action();
-    return error;
-}
-*/
-/*
-void output(FILE *file, const text_t *text) {
-    assert(file);
-    assert(text);
 
-    size_t n_lines = text->n_lines;
-    for (size_t i = 0; i < n_lines; i++) {
-        fwrite(text->lines[i].start, sizeof(char), text->lines[i].length, file);
-        fprintf(file, "\n");
-    }
-}
+    if (error) {
+        switch (error) {
+            case ONEG_NO_INPUT_FILE:
+                fprintf(stderr, "No input file error\n");
+                break;
+            case ONEG_NO_OUTPUT_FILE:
+                fprintf(stderr, "No output file error\n");
+                break;
+            case ONEG_SAVE_ERROR:
+                fprintf(stderr, "Saving error\n");
+                break;
+            default:
+                fprintf(stderr, "Onegin failed\n");
+                break;
+        }
 
-int onegin_client() {
-    int error = CONFIG.action();
-    return error;
-}
-
-int format() {
-    if (CONFIG.n_output_files != 1) {
-        ONEG_REPORT("There must be one out file for formatting. Files: %ld", CONFIG.n_output_files);
-        return ong_exit_code::OEC_INVALID_CFG;
+        return -1;
     }
 
-    FILE *from = fopen(CONFIG.input_file, "r");
-    if (from == nullptr) {
-        ONEG_REPORT("Opening input file error: %s", CONFIG.input_file);
-        return ong_exit_code::OEC_SYS_ERROR;
-    }
-
-    char *buff = nullptr;
-    int error = buffer(from, &buff);
-    if (error != 0)
-        return ong_exit_code::OEC_INVALID_CFG;
-
-    FILE *to = fopen(CONFIG.output_files[0], "w");
-    if (to == nullptr) {
-        ONEG_REPORT("Opening output file error: %s", CONFIG.output_files[0]);
-        return ong_exit_code::OEC_SYS_ERROR;
-    }
-
-
-    error = format_text(buff, to);
-    free(buff);
-    if (error != 0)
-        return ong_exit_code::OEC_INVALID_CFG;
-
-    fclose(to);
-    fclose(from);
     return 0;
 }
-
 
 int sort() {
-    text_t text = {0};
+    if (CONFIG.input_file == nullptr)
+        return ONEG_NO_INPUT_FILE;
 
-    FILE *file = fopen(CONFIG.input_file, "r");
-    if (file == nullptr) {
-        ONEG_REPORT("Opening input file error: %s", CONFIG.input_file);
-        return ong_exit_code::OEC_SYS_ERROR;
+    if (CONFIG.n_output_files == 0) 
+        return ONEG_NO_OUTPUT_FILE;
+
+    char *const buff = buffer(CONFIG.input_file);
+    if (buff == nullptr)
+        return -1;
+
+    int error = 0;
+    poem_t poem = {0};
+
+    error = construct_poem(&poem, buff);
+    if (error) {
+        free(buff);
+        return -1;
     }
 
-    if (CONFIG.n_output_files == 0) {
-        ONEG_REPORT("There are must be at least one output file. Output files count: %ld", CONFIG.n_output_files);
-        return ong_exit_code::OEC_INVALID_CFG;
+    error = cross_out(&poem, rule_empty);
+    if (error) {
+        destruct_poem(&poem);
+        free(buff);
+        return -1;
     }
 
-    int error = construct_text(&text, file);
-    if (error != 0) {
-        if (error == text_error_t::TEXT_INVALID_FORMAT) {
-            ONEG_REPORT("Bad input text format. Text lib error code: %d", error);
-        }
-        return ong_exit_code::OEC_INVALID_CFG;
-    }
+    CONFIG.sort_func(poem.lines, poem.n_lines, sizeof(line_t), CONFIG.compare_func);
 
-    if (ferror(file) != 0) {
-        ONEG_REPORT("File stream error. File id: %ld", (size_t)file);
-        return ong_exit_code::OEC_SYS_ERROR;
-    }
-
-    fclose(file);
-
-    CONFIG.sort_func(text.lines, text.n_lines, sizeof(line), CONFIG.compare_func);
-
+    error = 0;
     for (size_t i = 0; i < CONFIG.n_output_files; i++) {
-        file = fopen(CONFIG.output_files[i], "w");
-        if (file == nullptr) {
-            ONEG_REPORT("Opening output file error: %s... Next files will be ignored.", CONFIG.output_files[i]);
-            return ong_exit_code::OEC_INVALID_CFG;
-        }
-
-        output(file, &text);
-
-        if (ferror(file) != 0) {
-            ONEG_REPORT("File stream error. File id: %ld", (size_t)file);
-            return ong_exit_code::OEC_INVALID_CFG;
-        }
-        fclose(file);
+        error += save_poem(&poem, CONFIG.output_files[i]);
     }
 
-    destruct_text(&text);
+    destruct_poem(&poem);
+    free(buff);
+
+    if (error) 
+        return ONEG_SAVE_ERROR; 
+
     return 0;
 }
 
-int set_format_action(const char *args[], const size_t n_args) {
+int show_help() {
+    size_t n_options = sizeof(ONEGIN_OPTIONS) / sizeof(*ONEGIN_OPTIONS);
+    for (size_t i = 0; i < n_options; i++) {
+        printf("-%c | -%-*s - %-*s\n", ONEGIN_OPTIONS[i].short_keword, 
+                (int)KEYWORD_SIZE,     ONEGIN_OPTIONS[i].keyword,
+                (int)DESCRIPTION_SIZE, ONEGIN_OPTIONS[i].description);
+    }
+    return 0;
+}
+
+int set_sort_action(const char *args[], const size_t n_args) {
     if (n_args != 1)
-        return argv_error_t::ARGV_OPTION_FAIL;
+        return -1;
 
-    CONFIG.action = format;
+    CONFIG.action = sort;
+    return 0;
+}
 
+int set_help_action(const char *args[], const size_t n_args) {
+    if (n_args != 1)
+        return -1;
+
+    CONFIG.action = show_help;
     return 0;
 }
 
 int set_cfg_output(const char *args[], const size_t n_args) {
     if (n_args < 2 || n_args > MAX_OUT_FILES + 1)
-        return argv_error_t::ARGV_OPTION_FAIL;
+        return -1;
 
     size_t n_out = 0;
-    for (n_out = 0; n_out < n_args - 1; n_out++) {
+    for (n_out = 0; n_out < n_args - 1; n_out++)
         CONFIG.output_files[n_out] = args[n_out + 1];
-    }
 
     CONFIG.n_output_files = n_out;
 
@@ -160,18 +156,16 @@ int set_cfg_output(const char *args[], const size_t n_args) {
 }
 
 int set_cfg_input (const char *args[], const size_t n_args) {
-    if (n_args != 2) {
-        return argv_error_t::ARGV_OPTION_FAIL;
-    }
+    if (n_args != 2)
+        return -1;
 
     CONFIG.input_file = args[1];
     return 0;
 }
 
 int set_cfg_sort_func(const char *args[], const size_t n_args) {
-    if (n_args != 2) {
-        return argv_error_t::ARGV_OPTION_FAIL;
-    }
+    if (n_args != 2)
+        return -1;
 
     const char *sort = args[1];
 
@@ -182,13 +176,12 @@ int set_cfg_sort_func(const char *args[], const size_t n_args) {
             return 0;
         }
 
-    return argv_error_t::ARGV_OPTION_FAIL;
+    return -1;
 }
 
 int set_cfg_comp_func(const char *args[], const size_t n_args) {
-    if (n_args != 2) {
-        return argv_error_t::ARGV_OPTION_FAIL;
-    }
+    if (n_args != 2)
+        return -1;
 
     const char *comp = args[1];
 
@@ -199,28 +192,13 @@ int set_cfg_comp_func(const char *args[], const size_t n_args) {
             return 0;
         }
 
-    return argv_error_t::ARGV_OPTION_FAIL;
+    return -1;
 }
 
-int set_log_file(const char *args[], const size_t n_args) {
-    if (n_args != 2)
-        return argv_error_t::ARGV_OPTION_FAIL;
-
-    FILE *log = fopen(args[1], "w");
-    if (log == nullptr)
-            return argv_error_t::ARGV_OPTION_FAIL;
-    
-    ONEG_LOG = log;
-    return 0;
+int compare_alpha_from_end(const void *item1, const void *item2) {
+    return cmp_alpha_punct_ignored_from_end(*(line_t*)item1, *(line_t*)item2);
 }
 
-int show_onegin_help(const char *args[], const size_t n_args) {
-    size_t n_options = sizeof(ONEGIN_OPTIONS) / sizeof(*ONEGIN_OPTIONS);
-    for (size_t i = 0; i < n_options; i++) {
-        printf("-%c | -%-*s - %-*s\n", ONEGIN_OPTIONS[i].short_keword, 
-                (int)KEYWORD_SIZE,     ONEGIN_OPTIONS[i].keyword,
-                (int)DESCRIPTION_SIZE, ONEGIN_OPTIONS[i].description);
-    }
-    return 0;
+int compare_alpha(const void *item1, const void *item2) {
+    return cmp_alpha_punct_ignored(*(line_t*)item1, *(line_t*)item2);
 }
-*/

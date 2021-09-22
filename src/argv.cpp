@@ -1,11 +1,12 @@
-#include "include/argv.h"
 #include <assert.h>
-#include <stdio.h>
 #include <string.h>
+#include "include/argv.h"
 
 static const char *CURRENT_OPTION = nullptr;
 
-const char *argv_option() { return CURRENT_OPTION; }
+const char *argv_option() { 
+    return CURRENT_OPTION; 
+}
 
 int scan_args(const int argc, const char *argv[], 
               const option *options, const size_t n_options, 
@@ -19,13 +20,14 @@ int scan_args(const int argc, const char *argv[],
     const option *option = nullptr;
     size_t op = 0;
     for (op = 1; op < argc; op += n_args) {
+        CURRENT_OPTION = argv[op];
+
         if (*argv[op] != prefix)
             return ARGV_BAD_INPUT;
 
         option = find_option(options, n_options, argv[op], keyword_size);
         if (option == nullptr)
             return ARGV_NO_KEYWORD;
-        CURRENT_OPTION = argv[op];
 
         n_args = 1;
         for (arg = op + 1; arg < argc; n_args++)

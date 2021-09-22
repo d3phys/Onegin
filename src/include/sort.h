@@ -7,7 +7,7 @@
 #ifndef SORT_H_
 #define SORT_H_
 
-#include <cstddef>
+#include <stddef.h>
 
 /**
  * \brief Sorts an array using bubble sort alghorithm

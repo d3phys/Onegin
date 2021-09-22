@@ -1,14 +1,14 @@
 #include <assert.h>
-#include <unistd.h>
+#include <ctype.h>
+#include <stdlib.h>
 #include <sys/stat.h>
-#include <bits/types/FILE.h>
-#include <cctype>
-#include <cstdlib>
 #include <string.h>
-#include <stdio.h>
 #include <fcntl.h>
-#include "include/debug.h"
+#include <unistd.h>
 #include "include/poem.h"
+
+#include "include/debug.h"
+#include <errno.h>
 
 size_t count_lines(const char *const buffer) {
     assert(buffer);
@@ -46,7 +46,7 @@ const char *linetok(const char *const buffer) {
     return start;
 }
 
-void extract_lines(const char *const buffer, line *lines) {
+void extract_lines(const char *const buffer, line_t *lines) {
     assert(buffer);
     assert(lines);
 
@@ -75,13 +75,13 @@ void extract_lines(const char *const buffer, line *lines) {
     lines->end    = lines->start + lines->length - 1;
 }
 
-int cross_out(poem_t *const poem, int (*rule)(const line line)) {
+int cross_out(poem_t *const poem, int (*rule)(const line_t line)) {
     assert(poem);
     assert(rule);
 
-    line* write = poem->lines;
-    line* read  = poem->lines;
-    line* end   = poem->lines + poem->n_lines;
+    line_t* write = poem->lines;
+    line_t* read  = poem->lines;
+    line_t* end   = poem->lines + poem->n_lines;
 
     while (read != end) {
         if (rule(*read) == 0) {
@@ -91,7 +91,7 @@ int cross_out(poem_t *const poem, int (*rule)(const line line)) {
     }
 
     poem->n_lines = write - poem->lines;
-    poem->lines = (line *)realloc(poem->lines, sizeof(line) * (write - poem->lines));
+    poem->lines = (line_t *)realloc(poem->lines, sizeof(line_t) * (write - poem->lines));
 
     if (poem->lines == nullptr)
         return -1;
@@ -99,7 +99,7 @@ int cross_out(poem_t *const poem, int (*rule)(const line line)) {
     return 0;
 }
 
-int rule_empty(const line line) {
+int rule_empty(const line_t line) {
     for (size_t i = 0; i < line.length; i++)
         if (isspace(line.start[i]) == 0)
             return 0;
@@ -110,7 +110,7 @@ int rule_empty(const line line) {
 off_t get_size(const char *const file) {
     assert(file);
 
-    struct stat buff;
+    struct stat buff = {};
     int error = stat(file, &buff);
     if (error)
         return -1;
@@ -122,21 +122,28 @@ char *buffer(const char *const file) {
     assert(file);
 
     off_t file_size = get_size(file);
-    if (file_size < 0)
+    if (file_size < 0) {
+        perror("File size error");
         return nullptr;
+    }
 
     int fd = open(file, O_RDONLY); 
-    if (fd < 0)
+    if (fd < 0) {
+        perror("Open file error");
         return nullptr;
+    }
 
     char *buffer = (char *)calloc(file_size + 1, sizeof(char));
     if (buffer == nullptr) {
+        perror("Buffer memory allocation error");
         close(fd);
         return nullptr;
     }
 
     size_t n_read = read(fd, buffer, file_size + 1);
     if (n_read < 0) {
+        $V("%s", "stop");
+        perror("Read file error");
         free(buffer);
         close(fd);
         return nullptr;
@@ -144,6 +151,7 @@ char *buffer(const char *const file) {
 
     buffer = (char *)realloc(buffer, n_read + 1);
     if (buffer == nullptr) {
+        perror("Buffer memory reallocation failed.");
         free(buffer);
         close(fd);
         return nullptr;
@@ -168,6 +176,7 @@ int save_poem(const poem_t *const poem, const char *const file) {
         error += write(fd, "\n", 1);
 
         if (error < 0) {
+            perror("Write poem error");
             close(fd);
             return -1;
         }
@@ -182,7 +191,7 @@ int construct_poem(poem_t *const poem, const char *const buffer) {
     assert(buffer);
 
     poem->n_lines = count_lines(buffer);
-    poem->lines = (line *)calloc(poem->n_lines, sizeof(line));
+    poem->lines = (line_t *)calloc(poem->n_lines, sizeof(line_t));
     if (poem->lines == nullptr)
         return -1;
 
@@ -197,7 +206,7 @@ void destruct_poem(poem_t *const poem) {
     free(poem->lines);
 }
 
-int cmp_alpha(const line line1, const line line2) {
+int cmp_alpha(const line_t line1, const line_t line2) {
     const char *ch1 = line1.start;
     const char *ch2 = line2.start;
     
@@ -212,7 +221,7 @@ int cmp_alpha(const line line1, const line line2) {
     return (*ch1 > *ch2) - (*ch2 > *ch1);
 }
 
-int cmp_alpha_from_end(const line line1, const line line2) {
+int cmp_alpha_from_end(const line_t line1, const line_t line2) {
     const char *ch1 = line1.end;
     const char *ch2 = line2.end;
 
@@ -229,7 +238,7 @@ int cmp_alpha_from_end(const line line1, const line line2) {
     return (*ch1 > *ch2) - (*ch2 > *ch1);
 }
 
-int cmp_alpha_punct_ignored(const line line1, const line line2) {
+int cmp_alpha_punct_ignored(const line_t line1, const line_t line2) {
     const char *ch1 = line1.start;
     const char *ch2 = line2.start;
     
@@ -250,7 +259,7 @@ int cmp_alpha_punct_ignored(const line line1, const line line2) {
     return (*ch1 > *ch2) - (*ch2 > *ch1);
 }
 
-int cmp_alpha_punct_ignored_from_end(const line line1, const line line2) {
+int cmp_alpha_punct_ignored_from_end(const line_t line1, const line_t line2) {
     const char *ch1 = line1.end;
     const char *ch2 = line2.end;
     
