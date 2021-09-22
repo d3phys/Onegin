@@ -26,7 +26,7 @@ struct line_t {
  * \details Main poem object. Contains poem information.
  */
 struct poem_t {
-    line_t *lines    = nullptr; /**< Text lines                 */
+    line_t *lines  = nullptr; /**< Text lines                 */
     size_t n_lines = 0;       /**< Lines has been read        */
 };
 

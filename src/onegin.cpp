@@ -21,7 +21,7 @@ int construct_onegin_cfg(const int argc, const char *argv[]) {
     CONFIG.sort_func    = heap_sort;
     CONFIG.compare_func = compare_alpha;
 
-int error = scan_args(argc, argv, ONEGIN_OPTIONS, 
+    int error = scan_args(argc, argv, ONEGIN_OPTIONS, 
                           sizeof(ONEGIN_OPTIONS) / sizeof(*ONEGIN_OPTIONS));
 
     if (error) {
@@ -36,10 +36,11 @@ int error = scan_args(argc, argv, ONEGIN_OPTIONS,
                 fprintf(stderr, "Keyword %s not found\n", argv_option());
                 break;
             case ARGV_SYSTEM:
-                fprintf(stderr, "System error\n");
+                perror("System error\n");
                 break;
             default:
                 assert(nullptr);
+                fprintf(stderr, "Undefined error\n");
         }
 
         return -1;
@@ -64,7 +65,6 @@ int onegin_client() {
                 break;
             default:
                 fprintf(stderr, "Onegin failed\n");
-                break;
         }
 
         return -1;
@@ -172,7 +172,7 @@ int set_cfg_sort_func(const char *args[], const size_t n_args) {
     size_t n_algs = sizeof(ALGORITHMS) / sizeof(*ALGORITHMS);
     for (int i = 0; i < n_algs; i++)
         if (strncmp(ALGORITHMS[i].name, sort, KEYWORD_SIZE) == 0) {
-            CONFIG.sort_func= ALGORITHMS[i].sort_func;
+            CONFIG.sort_func = ALGORITHMS[i].sort_func;
             return 0;
         }
 

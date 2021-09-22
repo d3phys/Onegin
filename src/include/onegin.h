@@ -38,8 +38,8 @@ int set_cfg_sort_func(const char *args[], const size_t n_args);
 int set_cfg_comp_func(const char *args[], const size_t n_args);
 
 const option ONEGIN_OPTIONS[] {
-    {"from",    'f', set_cfg_input,     "sets input file"        },
-    {"to",      't', set_cfg_output,    "sets output files"      },
+    {"input",   'i', set_cfg_input,     "sets input file"        },
+    {"output",  'o', set_cfg_output,    "sets output files"      },
     {"compare", 'c', set_cfg_comp_func, "sets the priority"      },
     {"help",    'h', set_help_action,   "prints this message"    },
     {"sort",    's', set_cfg_sort_func, "sets the sort algorithm"},
@@ -66,15 +66,13 @@ int compare_alpha_from_end(const void *item1, const void *item2);
 int compare_alpha(const void *item1, const void *item2);
 
 const priority PRIORITIES[] {
-    {"forward",  compare_alpha},
-    {"fromback", compare_alpha_from_end},
+    {"alpha",  compare_alpha},
+    {"alphar", compare_alpha_from_end},
 };
-
 
 int construct_onegin_cfg(const int argc, const char *argv[]);
 
-/**
- * \brief Main Onegin client procedure
+/** \brief Main Onegin client procedure
  */
 int onegin_client();
 
